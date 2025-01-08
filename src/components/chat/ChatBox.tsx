@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
@@ -15,11 +15,22 @@ export function ChatBox() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    setError(null);
     const userMessage: Message = {
       role: 'user',
       content: input.trim()
@@ -30,22 +41,44 @@ export function ChatBox() {
     setIsLoading(true);
 
     try {
+      const recentMessages = messages.slice(-3);
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage.content })
+        body: JSON.stringify({
+          message: userMessage.content,
+          context: recentMessages
+        })
       });
-
-      if (!response.ok) throw new Error('Failed to get response');
 
       const data = await response.json();
       
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to get response';
+        if (response.status === 401) {
+          throw new Error('API key error. Please check your configuration.');
+        } else if (response.status === 429) {
+          throw new Error('Too many requests. Please try again later.');
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.message) {
+        throw new Error('No response received');
+      }
+
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.message
       }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
+      setError(error.message);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.'
@@ -56,45 +89,53 @@ export function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-2xl mx-auto w-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="chat-container">
+      <div className="message-list">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`message-bubble ${
+              message.role === 'user' ? 'message-user' : 'message-assistant'
+            }`}
           >
-            <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                message.role === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-900'
-              }`}
-            >
-              {message.content}
-            </div>
+            {message.content}
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-900 rounded-lg px-4 py-2">
-              Typing...
-            </div>
+          <div className="typing-indicator">
+            <div className="typing-dot" style={{ animationDelay: '0s' }} />
+            <div className="typing-dot" style={{ animationDelay: '0.2s' }} />
+            <div className="typing-dot" style={{ animationDelay: '0.4s' }} />
           </div>
         )}
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-2 mt-2 animate-fade-in">
+            {error}
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t bg-white">
+      <form onSubmit={handleSubmit} className="input-container">
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={isLoading}
           />
-          <Button type="submit" disabled={isLoading}>
-            <ArrowRightIcon className="h-4 w-4" />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="transition-transform hover:scale-105 active:scale-95"
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <ArrowRightIcon className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </form>

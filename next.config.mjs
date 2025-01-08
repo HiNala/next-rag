@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
-const config = {
+const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  images: {
+    domains: [],
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
 };
 
-export default config; 
+export default nextConfig; 

@@ -24,94 +24,96 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-md hover:bg-accent md:hidden"
+        className="fixed top-3 left-3 z-50 p-2 rounded-lg active:bg-accent/50 md:hidden touch-manipulation"
+        aria-label="Toggle menu"
+        type="button"
       >
         {isMobileMenuOpen ? (
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         ) : (
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
         )}
       </button>
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 z-40 w-64 h-[100dvh] transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
-        <div className="flex flex-col h-full px-3 py-4 bg-background border-r">
-          {/* Logo */}
-          <Link href="/" className="flex items-center mb-5 pl-2.5">
-            <span className="self-center text-xl font-semibold whitespace-nowrap">
-              Next.js RAG App
-            </span>
-          </Link>
+        <div className="flex flex-col h-full bg-background border-r md:rounded-none rounded-r-2xl overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="flex items-center h-12 mb-6 pl-2.5 mt-4 md:mt-0"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="self-center text-lg md:text-xl font-semibold whitespace-nowrap">
+                Next.js RAG App
+              </span>
+            </Link>
 
-          {/* Navigation Links */}
-          <ul className="space-y-2 font-medium flex-1">
-            <li>
-              <Link
-                href="/"
-                className="flex items-center p-2 rounded-lg hover:bg-accent group"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span>Home</span>
-              </Link>
-            </li>
-            {session && (
-              <>
+            {/* Navigation Links */}
+            <nav>
+              <ul className="space-y-1">
                 <li>
                   <Link
-                    href="/chat"
-                    className="flex items-center p-2 rounded-lg hover:bg-accent group"
+                    href="/"
+                    className="flex items-center px-2.5 h-11 rounded-lg hover:bg-accent group"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <span>Chat</span>
+                    <span>Home</span>
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/profile"
-                    className="flex items-center p-2 rounded-lg hover:bg-accent group"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <span>Profile</span>
-                  </Link>
-                </li>
-              </>
-            )}
-          </ul>
+                {session && (
+                  <>
+                    <li>
+                      <Link
+                        href="/chat"
+                        className="flex items-center px-2.5 h-11 rounded-lg hover:bg-accent group"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span>Chat</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/profile"
+                        className="flex items-center px-2.5 h-11 rounded-lg hover:bg-accent group"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span>Profile</span>
+                      </Link>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </nav>
+          </div>
 
-          {/* Auth Section */}
-          <div className="pt-2 space-y-2 border-t">
+          {/* Auth Buttons */}
+          <div className="p-3 border-t">
             {session ? (
-              <>
-                <div className="px-2 py-1 text-sm text-muted-foreground">
-                  {session.user?.email}
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    signOut({ callbackUrl: '/' });
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Sign Out
-                </Button>
-              </>
+              <Button
+                onClick={() => signOut()}
+                className="w-full justify-center"
+                variant="outline"
+              >
+                Sign Out
+              </Button>
             ) : (
               <>
                 <Button
-                  variant="outline"
-                  className="w-full"
                   onClick={() => handleAuthClick('signin')}
+                  className="w-full justify-center mb-2"
+                  variant="outline"
                 >
                   Sign In
                 </Button>
                 <Button
-                  className="w-full"
                   onClick={() => handleAuthClick('signup')}
+                  className="w-full justify-center"
                 >
                   Sign Up
                 </Button>

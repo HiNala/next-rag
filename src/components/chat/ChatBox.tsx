@@ -44,26 +44,35 @@ export default function ChatBox() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    
+    // Trim input and check for empty state
+    const trimmedInput = input.trim();
+    if (!trimmedInput || isLoading) return;
 
+    // Clear error state and prepare message
     setError(null);
     const userMessage: Message = {
       role: 'user',
-      content: input.trim(),
+      content: trimmedInput,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
     try {
+      // Set loading state before any state updates
+      setIsLoading(true);
+      
+      // Update messages with user input
+      setMessages((prev) => [...prev, userMessage]);
+      setInput('');
+
+      // Get recent context
       const recentMessages = messages.slice(-3);
 
+      // Make API request
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMessage.content,
+          message: trimmedInput,
           context: recentMessages,
         }),
       });
@@ -88,6 +97,7 @@ export default function ChatBox() {
         throw new Error('No response received');
       }
 
+      // Update messages with assistant response
       setMessages((prev) => [
         ...prev,
         {
@@ -99,13 +109,21 @@ export default function ChatBox() {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       setError(errorMessage);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'I apologize, but I encountered an error. Please try again in a moment.',
-        },
-      ]);
+      
+      // Only add error message to chat if the user message was added
+      setMessages((prev) => {
+        // Check if the last message was the user's message
+        if (prev.length > 0 && prev[prev.length - 1].role === 'user') {
+          return [
+            ...prev,
+            {
+              role: 'assistant',
+              content: 'I apologize, but I encountered an error. Please try again in a moment.',
+            },
+          ];
+        }
+        return prev;
+      });
     } finally {
       setIsLoading(false);
     }

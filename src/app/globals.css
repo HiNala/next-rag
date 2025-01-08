@@ -71,7 +71,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen;
+  }
+  /* Main content area */
+  main {
+    @apply ml-64 pt-16 min-h-screen;
   }
 }
 
@@ -88,7 +92,7 @@
 
 @layer components {
   .chat-container {
-    @apply flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto w-full;
+    @apply flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto w-full overflow-hidden;
   }
 
   .message-list {
@@ -108,7 +112,7 @@
   }
 
   .input-container {
-    @apply p-4 border-t bg-background sticky bottom-0;
+    @apply p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0;
   }
 
   .typing-indicator {

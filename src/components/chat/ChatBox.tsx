@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { MarkdownMessage } from './MarkdownMessage';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -19,8 +20,14 @@ export function ChatBox() {
   const [isChatActive, setIsChatActive] = useState(false);
 
   const scrollToBottom = () => {
-    if (isChatActive) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isChatActive && messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+        if (isNearBottom) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
 
@@ -107,13 +114,13 @@ export function ChatBox() {
             What do you want to know?
           </h1>
           <form onSubmit={handleSubmit} className="w-full">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 p-1">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything..."
-                className="flex-1 px-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
+                className="flex-1 px-4 py-2.5 bg-background border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
                 disabled={isLoading}
               />
               <Button 
@@ -135,14 +142,11 @@ export function ChatBox() {
         <>
           <div className="message-list message-list-active">
             {messages.map((message, index) => (
-              <div
+              <MarkdownMessage
                 key={index}
-                className={`message-bubble ${
-                  message.role === 'user' ? 'message-user' : 'message-assistant'
-                }`}
-              >
-                {message.content}
-              </div>
+                content={message.content}
+                role={message.role}
+              />
             ))}
             {isLoading && (
               <div className="typing-indicator">
@@ -160,13 +164,13 @@ export function ChatBox() {
           </div>
 
           <form onSubmit={handleSubmit} className="input-container input-active">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 p-1">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything..."
-                className="flex-1 px-4 py-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2.5 bg-background border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
                 disabled={isLoading}
               />
               <Button 

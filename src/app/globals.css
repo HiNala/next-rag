@@ -92,7 +92,7 @@
 
 @layer components {
   .chat-container {
-    @apply w-full transition-all duration-500 ease-in-out;
+    @apply w-full transition-all duration-500 ease-in-out overflow-hidden flex flex-col;
   }
 
   .chat-initial {
@@ -100,19 +100,19 @@
   }
 
   .chat-active {
-    @apply max-w-3xl px-4 flex flex-col min-h-[calc(100vh-4rem)] mt-4 items-stretch justify-start;
+    @apply max-w-3xl px-4 h-[calc(100vh-5rem)] items-stretch justify-start;
   }
 
   .message-list {
-    @apply flex-1 overflow-y-auto space-y-4 scrollbar-hidden w-full transition-all duration-500 ease-in-out;
+    @apply flex-1 overflow-y-auto space-y-4 scrollbar-hidden;
   }
 
   .message-list-active {
-    @apply flex flex-col items-stretch justify-start w-full;
+    @apply flex flex-col items-stretch justify-start w-full pb-4;
   }
 
   .message-bubble {
-    @apply max-w-[85%] rounded-2xl px-5 py-3 animate-fade-in transition-all duration-300 text-base;
+    @apply max-w-[85%] rounded-xl px-4 py-3 animate-fade-in;
   }
 
   .message-user {
@@ -124,11 +124,7 @@
   }
 
   .input-container {
-    @apply p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0 w-full transition-all duration-500 ease-in-out mt-auto;
-  }
-
-  .input-active {
-    @apply max-w-none w-full;
+    @apply p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0 w-full mt-auto;
   }
 
   .typing-indicator {
@@ -138,4 +134,37 @@
   .typing-dot {
     @apply w-2 h-2 rounded-full bg-muted-foreground animate-bounce-loader;
   }
+}
+
+/* Markdown Specific Styles */
+.prose {
+  @apply text-base;
+}
+
+.prose h2 {
+  @apply text-lg font-semibold mb-2;
+}
+
+.prose h3 {
+  @apply text-base font-medium mb-2;
+}
+
+.prose p {
+  @apply mb-2;
+}
+
+.prose ul, .prose ol {
+  @apply mb-2 space-y-1;
+}
+
+.prose li {
+  @apply ml-4;
+}
+
+.prose hr {
+  @apply my-3 border-t border-border;
+}
+
+.prose strong {
+  @apply font-semibold;
 }

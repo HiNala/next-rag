@@ -1,15 +1,15 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
 
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
     const isAuth = !!token;
-    const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
+    const isAuthPage = req.nextUrl.pathname.startsWith('/auth');
 
     if (isAuthPage) {
       if (isAuth) {
-        return NextResponse.redirect(new URL("/", req.url));
+        return NextResponse.redirect(new URL('/', req.url));
       }
       return null;
     }
@@ -26,9 +26,9 @@ export default withAuth(
     }
 
     // Handle role-based access
-    if (req.nextUrl.pathname.startsWith("/admin")) {
-      if (token?.role !== "admin" && token?.role !== "super_admin") {
-        return NextResponse.redirect(new URL("/403", req.url));
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+      if (token?.role !== 'admin' && token?.role !== 'super_admin') {
+        return NextResponse.redirect(new URL('/403', req.url));
       }
     }
   },
@@ -41,10 +41,5 @@ export default withAuth(
 
 // Specify which routes to protect
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/profile/:path*",
-    "/auth/signin",
-    "/auth/signup",
-  ],
-}; 
+  matcher: ['/admin/:path*', '/profile/:path*', '/auth/signin', '/auth/signup'],
+};

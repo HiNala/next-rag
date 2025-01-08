@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-export function ChatBox() {
+export default function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,11 +71,11 @@ export function ChatBox() {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.error || 'Failed to get response';
+        let errorMessage = data.error || 'Failed to get response';
         if (response.status === 401) {
-          throw new Error('API key error. Please check your configuration.');
+          errorMessage = 'Chat is currently unavailable. Please try again later.';
         } else if (response.status === 429) {
-          throw new Error('Too many requests. Please try again later.');
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
         }
         throw new Error(errorMessage);
       }
@@ -103,7 +103,7 @@ export function ChatBox() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
+          content: 'I apologize, but I encountered an error. Please try again in a moment.',
         },
       ]);
     } finally {

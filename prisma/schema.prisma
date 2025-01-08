@@ -30,7 +30,6 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId])
 }
 
 model Session {
@@ -39,8 +38,6 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model User {
@@ -52,13 +49,10 @@ model User {
   hashedPassword    String?
   role              String    @default("user")
   subscriptionLevel String    @default("free")
-  darkMode          Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  
-  accounts  Account[]
-  sessions  Session[]
-  messages  Message[]
+  accounts          Account[]
+  sessions          Session[]
 }
 
 model VerificationToken {
@@ -67,15 +61,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  userId    String
-  role      String   // 'user' | 'assistant' | 'system'
-  content   String
-  timestamp DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }

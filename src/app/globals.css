@@ -75,7 +75,7 @@
   }
   /* Main content area */
   main {
-    @apply ml-64 pt-16 min-h-screen;
+    @apply ml-0 md:ml-64 pt-16 min-h-screen;
   }
 }
 
@@ -92,15 +92,15 @@
 
 @layer components {
   .chat-container {
-    @apply w-full transition-all duration-500 ease-in-out overflow-hidden flex flex-col;
+    @apply w-full transition-all duration-500 ease-in-out overflow-hidden flex flex-col px-2 md:px-4;
   }
 
   .chat-initial {
-    @apply max-w-xl;
+    @apply max-w-sm md:max-w-xl;
   }
 
   .chat-active {
-    @apply max-w-3xl px-4 h-[calc(100vh-5rem)] items-stretch justify-start;
+    @apply max-w-full md:max-w-3xl h-[calc(100vh-5rem)] items-stretch justify-start;
   }
 
   .message-list {
@@ -112,7 +112,7 @@
   }
 
   .message-bubble {
-    @apply max-w-[85%] rounded-xl px-4 py-3 animate-fade-in;
+    @apply max-w-[95%] md:max-w-[85%] rounded-xl px-3 md:px-4 py-2 md:py-3 animate-fade-in text-sm md:text-base;
   }
 
   .message-user {
@@ -124,15 +124,15 @@
   }
 
   .input-container {
-    @apply p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0 w-full mt-auto;
+    @apply p-2 md:p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky bottom-0 w-full mt-auto;
   }
 
   .typing-indicator {
-    @apply flex items-center gap-1 px-3 py-2 bg-secondary rounded-lg self-start animate-fade-in;
+    @apply flex items-center gap-1 px-2 md:px-3 py-1.5 md:py-2 bg-secondary rounded-lg self-start animate-fade-in;
   }
 
   .typing-dot {
-    @apply w-2 h-2 rounded-full bg-muted-foreground animate-bounce-loader;
+    @apply w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-muted-foreground animate-bounce-loader;
   }
 }
 

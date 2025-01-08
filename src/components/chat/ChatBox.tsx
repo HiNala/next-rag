@@ -114,13 +114,13 @@ export function ChatBox() {
             What do you want to know?
           </h1>
           <form onSubmit={handleSubmit} className="w-full">
-            <div className="flex items-center gap-2 p-1">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything..."
-                className="flex-1 px-4 py-2.5 bg-background border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
+                className="flex-1 px-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
                 disabled={isLoading}
               />
               <Button 
@@ -164,13 +164,13 @@ export function ChatBox() {
           </div>
 
           <form onSubmit={handleSubmit} className="input-container input-active">
-            <div className="flex items-center gap-2 p-1">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything..."
-                className="flex-1 px-4 py-2.5 bg-background border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base"
+                className="flex-1 px-4 py-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 disabled={isLoading}
               />
               <Button 

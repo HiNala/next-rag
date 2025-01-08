@@ -10,21 +10,29 @@ interface Message {
 }
 
 export function ChatBox() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hello! How can I help you today?' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isChatActive, setIsChatActive] = useState(false);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isChatActive) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isChatActive]);
+
+  useEffect(() => {
+    if (messages.length > 0 && !isChatActive) {
+      setIsChatActive(true);
+    }
+  }, [messages, isChatActive]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,56 +97,93 @@ export function ChatBox() {
   };
 
   return (
-    <div className="chat-container">
-      <div className="message-list">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`message-bubble ${
-              message.role === 'user' ? 'message-user' : 'message-assistant'
-            }`}
-          >
-            {message.content}
-          </div>
-        ))}
-        {isLoading && (
-          <div className="typing-indicator">
-            <div className="typing-dot" style={{ animationDelay: '0s' }} />
-            <div className="typing-dot" style={{ animationDelay: '0.2s' }} />
-            <div className="typing-dot" style={{ animationDelay: '0.4s' }} />
-          </div>
-        )}
-        {error && (
-          <div className="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-2 mt-2 animate-fade-in">
-            {error}
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <form onSubmit={handleSubmit} className="input-container">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
-            className="flex-1 px-4 py-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={isLoading}
-          />
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="transition-transform hover:scale-105 active:scale-95"
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <ArrowRightIcon className="h-4 w-4" />
-            )}
-          </Button>
+    <div 
+      ref={containerRef}
+      className={`chat-container ${isChatActive ? 'chat-active' : 'chat-initial'}`}
+    >
+      {!isChatActive ? (
+        <div className="flex flex-col space-y-6 max-w-xl w-full">
+          <h1 className="text-4xl font-medium text-foreground text-center">
+            What do you want to know?
+          </h1>
+          <form onSubmit={handleSubmit} className="w-full">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything..."
+                className="flex-1 px-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg"
+                disabled={isLoading}
+              />
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                size="lg"
+                className="transition-transform hover:scale-105 active:scale-95"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowRightIcon className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      ) : (
+        <>
+          <div className="message-list message-list-active">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`message-bubble ${
+                  message.role === 'user' ? 'message-user' : 'message-assistant'
+                }`}
+              >
+                {message.content}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="typing-indicator">
+                <div className="typing-dot" style={{ animationDelay: '0s' }} />
+                <div className="typing-dot" style={{ animationDelay: '0.2s' }} />
+                <div className="typing-dot" style={{ animationDelay: '0.4s' }} />
+              </div>
+            )}
+            {error && (
+              <div className="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-2 mt-2 animate-fade-in">
+                {error}
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <form onSubmit={handleSubmit} className="input-container input-active">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything..."
+                className="flex-1 px-4 py-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={isLoading}
+              />
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="transition-transform hover:scale-105 active:scale-95"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowRightIcon className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </form>
+        </>
+      )}
     </div>
   );
 } 

@@ -20,9 +20,7 @@ export function MarkdownMessage({ content, role }: MarkdownMessageProps) {
   if (!isLongMessage) {
     return (
       <div className={`message-bubble ${role === 'user' ? 'message-user' : 'message-assistant'}`}>
-        <div className="text-base whitespace-pre-line">
-          {content}
-        </div>
+        <div className="text-base whitespace-pre-line">{content}</div>
       </div>
     );
   }
@@ -31,24 +29,14 @@ export function MarkdownMessage({ content, role }: MarkdownMessageProps) {
     h2: ({ children }: MarkdownComponentProps) => (
       <h2 className="text-lg font-semibold mb-2">{children}</h2>
     ),
-    p: ({ children }: MarkdownComponentProps) => (
-      <p className="mb-2">{children}</p>
-    ),
-    ul: ({ children }: MarkdownComponentProps) => (
-      <ul className="mb-2 space-y-1">{children}</ul>
-    ),
-    ol: ({ children }: MarkdownComponentProps) => (
-      <ol className="mb-2 space-y-1">{children}</ol>
-    ),
-    li: ({ children }: MarkdownComponentProps) => (
-      <li className="ml-4">{children}</li>
-    ),
+    p: ({ children }: MarkdownComponentProps) => <p className="mb-2">{children}</p>,
+    ul: ({ children }: MarkdownComponentProps) => <ul className="mb-2 space-y-1">{children}</ul>,
+    ol: ({ children }: MarkdownComponentProps) => <ol className="mb-2 space-y-1">{children}</ol>,
+    li: ({ children }: MarkdownComponentProps) => <li className="ml-4">{children}</li>,
     strong: ({ children }: MarkdownComponentProps) => (
       <strong className="font-semibold">{children}</strong>
     ),
-    hr: () => (
-      <hr className="my-3 border-t border-border" />
-    ),
+    hr: () => <hr className="my-3 border-t border-border" />,
     code: ({ children }: MarkdownComponentProps) => (
       <code className="px-1 py-0.5 bg-secondary/50 rounded text-sm">{children}</code>
     ),
@@ -67,4 +55,4 @@ export function MarkdownMessage({ content, role }: MarkdownMessageProps) {
       </div>
     </div>
   );
-} 
+}

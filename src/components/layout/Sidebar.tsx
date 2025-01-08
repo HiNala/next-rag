@@ -21,17 +21,15 @@ export function Sidebar() {
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="fixed top-4 left-4 z-50 md:hidden"
       >
-        {isMobileMenuOpen ? (
-          <XMarkIcon className="h-6 w-6" />
-        ) : (
-          <Bars3Icon className="h-6 w-6" />
-        )}
+        {isMobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
       </button>
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 w-64 bg-background border-r h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0`}>
+      <aside
+        className={`fixed left-0 top-0 w-64 bg-background border-r h-screen flex flex-col transform transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
         <div className="shrink-0 p-4 border-b">
           <Link href="/" className="flex items-center space-x-2">
             <StarIcon className="h-6 w-6" />
@@ -59,7 +57,9 @@ export function Sidebar() {
         </nav>
 
         <div className="shrink-0 p-4 space-y-2 border-t">
-          <Button variant="outline" className="w-full">Sign In</Button>
+          <Button variant="outline" className="w-full">
+            Sign In
+          </Button>
           <Button className="w-full">Sign Up</Button>
         </div>
       </aside>
@@ -73,4 +73,4 @@ export function Sidebar() {
       )}
     </>
   );
-} 
+}

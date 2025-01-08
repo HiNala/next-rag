@@ -17,16 +17,28 @@ export function Header() {
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Home
             </Link>
-            <Link href="/discover" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/discover"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Discover
             </Link>
-            <Link href="/spaces" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/spaces"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Spaces
             </Link>
-            <Link href="/library" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/library"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Library
             </Link>
           </nav>
@@ -40,4 +52,4 @@ export function Header() {
       </div>
     </header>
   );
-} 
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { MarkdownMessage } from './MarkdownMessage';
@@ -9,6 +9,11 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
+
+type ChatError = {
+  message: string;
+  status?: number;
+};
 
 export function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -19,7 +24,7 @@ export function ChatBox() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isChatActive, setIsChatActive] = useState(false);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (isChatActive && messagesEndRef.current) {
       const container = messagesEndRef.current.parentElement;
       if (container) {
@@ -29,11 +34,11 @@ export function ChatBox() {
         }
       }
     }
-  };
+  }, [isChatActive]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isChatActive]);
+  }, [messages, scrollToBottom]);
 
   useEffect(() => {
     if (messages.length > 0 && !isChatActive) {
@@ -91,9 +96,10 @@ export function ChatBox() {
         role: 'assistant',
         content: data.message
       }]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error:', error);
-      setError(error.message);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(errorMessage);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.'
@@ -104,7 +110,7 @@ export function ChatBox() {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`chat-container ${isChatActive ? 'chat-active' : 'chat-initial'}`}
     >
@@ -123,8 +129,8 @@ export function ChatBox() {
                 className="chat-input"
                 disabled={isLoading}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
                 size="lg"
                 className="transition-transform hover:scale-105 active:scale-95"
@@ -142,11 +148,7 @@ export function ChatBox() {
         <>
           <div className="message-list message-list-active">
             {messages.map((message, index) => (
-              <MarkdownMessage
-                key={index}
-                content={message.content}
-                role={message.role}
-              />
+              <MarkdownMessage key={index} content={message.content} role={message.role} />
             ))}
             {isLoading && (
               <div className="typing-indicator">
@@ -173,8 +175,8 @@ export function ChatBox() {
                 className="chat-input"
                 disabled={isLoading}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
                 className="transition-transform hover:scale-105 active:scale-95"
               >
@@ -190,4 +192,4 @@ export function ChatBox() {
       )}
     </div>
   );
-} 
+}

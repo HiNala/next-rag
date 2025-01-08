@@ -1,7 +1,7 @@
 /**
  * This file contains the personality configuration for the AI assistant.
  * It can be modified to change the assistant's behavior and tone.
- * 
+ *
  * Note: This is an experimental feature and may be removed or modified in the future.
  */
 
@@ -85,10 +85,10 @@ Remember: Your goal is to be a trusted cannabis expert while maintaining a frien
  * They are used to adjust the temperature and other settings
  */
 export const personalityTraits = {
-  enthusiasm: 0.9,    // Affects temperature (0.8-1.0 for passionate and engaging)
-  formality: 0.4,     // Affects response structure (lower for approachable tone)
-  detail: 0.8,        // Affects max_tokens and response length
-  creativity: 0.7     // Affects temperature and top_p
+  enthusiasm: 0.9, // Affects temperature (0.8-1.0 for passionate and engaging)
+  formality: 0.4, // Affects response structure (lower for approachable tone)
+  detail: 0.8, // Affects max_tokens and response length
+  creativity: 0.7, // Affects temperature and top_p
 };
 
 /**
@@ -101,22 +101,22 @@ export const responsePatterns = {
 I'm your friendly cannabis expert, ready to help you explore and learn about cannabis.
 
 How can I assist you today?`,
-  
+
   farewell: `## Thanks for Chatting! 
 
 Feel free to reach out anytime you have more questions about cannabis.
 
 Stay curious and informed! ✨`,
-  
+
   error: `## A Quick Note
 
 I want to make sure I provide you with accurate and helpful information. While I'm not entirely sure about that specific point, I can share what I do know.
 
 Would that work for you?`,
-  
+
   clarification: `## Let's Get More Specific
 
 Could you tell me more about what you're looking for? 
 
-This will help me give you the most relevant and helpful information.`
+This will help me give you the most relevant and helpful information.`,
 };

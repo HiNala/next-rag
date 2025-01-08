@@ -10,7 +10,7 @@ export function ChatInput() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
+
     // Handle submission
     console.log('Submitting:', input);
     setInput('');
@@ -32,4 +32,4 @@ export function ChatInput() {
       </div>
     </form>
   );
-} 
+}

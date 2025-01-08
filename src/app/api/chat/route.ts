@@ -54,7 +54,7 @@ Remember: Each section should be visually distinct with proper spacing.
 
 export async function POST(req: Request) {
   try {
-    const { message, context = [] } = await req.json() as ChatRequest;
+    const { message, context = [] } = (await req.json()) as ChatRequest;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
@@ -65,35 +65,41 @@ export async function POST(req: Request) {
     }
 
     // Convert context messages to OpenAI format
-    const contextMessages: ChatCompletionMessageParam[] = context.map(msg => ({
+    const contextMessages: ChatCompletionMessageParam[] = context.map((msg) => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     })) as ChatCompletionMessageParam[];
 
     // Prepare messages array with personality context and conversation history
     const messages: ChatCompletionMessageParam[] = [
       {
         role: 'system',
-        content: assistantPersonality
+        content: assistantPersonality,
       } as ChatCompletionMessageParam,
       {
         role: 'system',
-        content: formattingReminder
+        content: formattingReminder,
       } as ChatCompletionMessageParam,
-      ...(context.length === 0 ? [{
-        role: 'assistant',
-        content: responsePatterns.greeting
-      } as ChatCompletionMessageParam] : []),
+      ...(context.length === 0
+        ? [
+            {
+              role: 'assistant',
+              content: responsePatterns.greeting,
+            } as ChatCompletionMessageParam,
+          ]
+        : []),
       ...contextMessages,
       {
         role: 'user',
-        content: message + "\n\nPlease format your response clearly using markdown, with proper spacing and structure."
-      } as ChatCompletionMessageParam
+        content:
+          message +
+          '\n\nPlease format your response clearly using markdown, with proper spacing and structure.',
+      } as ChatCompletionMessageParam,
     ];
 
     // Adjust API parameters based on personality traits
-    const temperature = 0.7 + (personalityTraits.enthusiasm * 0.2); // Range: 0.7-0.9
-    const maxTokens = Math.floor(400 + (personalityTraits.detail * 400)); // Range: 400-800
+    const temperature = 0.7 + personalityTraits.enthusiasm * 0.2; // Range: 0.7-0.9
+    const maxTokens = Math.floor(400 + personalityTraits.detail * 400); // Range: 400-800
     const presencePenalty = personalityTraits.creativity * 0.4; // Range: 0-0.4
     const frequencyPenalty = personalityTraits.formality * 0.4; // Range: 0-0.4
 
@@ -116,12 +122,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: reply });
   } catch (error) {
     console.error('Error in chat API:', error);
-    
-    const errorMessage = error instanceof Error 
-      ? error.message === 'No reply from OpenAI' 
-        ? responsePatterns.error 
-        : error.message
-      : 'Internal server error';
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message === 'No reply from OpenAI'
+          ? responsePatterns.error
+          : error.message
+        : 'Internal server error';
 
     return NextResponse.json(
       { error: errorMessage },

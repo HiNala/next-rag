@@ -10,11 +10,6 @@ interface Message {
   content: string;
 }
 
-type ChatError = {
-  message: string;
-  status?: number;
-};
-
 export function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -28,7 +23,8 @@ export function ChatBox() {
     if (isChatActive && messagesEndRef.current) {
       const container = messagesEndRef.current.parentElement;
       if (container) {
-        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+        const isNearBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight < 100;
         if (isNearBottom) {
           messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
@@ -53,27 +49,27 @@ export function ChatBox() {
     setError(null);
     const userMessage: Message = {
       role: 'user',
-      content: input.trim()
+      content: input.trim(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
       const recentMessages = messages.slice(-3);
-      
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
-          context: recentMessages
-        })
+          context: recentMessages,
+        }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         const errorMessage = data.error || 'Failed to get response';
         if (response.status === 401) {
@@ -92,18 +88,24 @@ export function ChatBox() {
         throw new Error('No response received');
       }
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.message
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.message,
+        },
+      ]);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       setError(errorMessage);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'Sorry, I encountered an error. Please try again.',
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }

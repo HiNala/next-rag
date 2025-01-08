@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { assistantPersonality, personalityTraits, responsePatterns } from '@/config/assistant-personality';
 
-// Validate API key presence
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('Missing OpenAI API Key');
-}
-
+// Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 export async function POST(req: Request) {
   try {
-    const { message, context } = await req.json();
+    const { message, context = [] } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -21,55 +18,69 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate context format
-    if (context && !Array.isArray(context)) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
-        { error: 'Context must be an array' },
-        { status: 400 }
-      );
-    }
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant. Provide clear and concise responses.',
-        },
-        ...(context || []),
-        { role: 'user', content: message },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
-    });
-
-    const reply = completion.choices[0]?.message?.content;
-    
-    if (!reply) {
-      throw new Error('No response generated');
-    }
-
-    return NextResponse.json({ message: reply });
-  } catch (error: any) {
-    console.error('OpenAI API Error:', error);
-    
-    // Handle specific error types
-    if (error.code === 'invalid_api_key' || error.message?.includes('API key')) {
-      return NextResponse.json(
-        { error: 'API key error. Please check your configuration.' },
+        { error: 'OpenAI API key is not configured' },
         { status: 401 }
       );
     }
 
-    if (error.code === 'rate_limit_exceeded') {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Please try again later.' },
-        { status: 429 }
-      );
+    // Prepare messages array with personality context and conversation history
+    const messages = [
+      // Add personality context as system message
+      {
+        role: 'system',
+        content: assistantPersonality
+      },
+      // Add initial greeting for first message if no context
+      ...(context.length === 0 ? [{
+        role: 'assistant',
+        content: responsePatterns.greeting
+      }] : []),
+      // Add recent conversation context
+      ...context.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      // Add current user message
+      {
+        role: 'user',
+        content: message
+      }
+    ];
+
+    // Adjust API parameters based on personality traits
+    const temperature = 0.6 + (personalityTraits.enthusiasm * 0.2); // Range: 0.6-0.8
+    const maxTokens = Math.floor(300 + (personalityTraits.detail * 400)); // Range: 300-700
+    const presencePenalty = personalityTraits.creativity * 0.4; // Range: 0-0.4
+    const frequencyPenalty = personalityTraits.formality * 0.4; // Range: 0-0.4
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: messages,
+      temperature: temperature,
+      max_tokens: maxTokens,
+      presence_penalty: presencePenalty,
+      frequency_penalty: frequencyPenalty,
+    });
+
+    const reply = completion.choices[0]?.message?.content;
+
+    if (!reply) {
+      throw new Error('No reply from OpenAI');
     }
 
+    return NextResponse.json({ message: reply });
+  } catch (error: any) {
+    console.error('Error in chat API:', error);
+    
+    // Use personality-appropriate error message
+    const errorMessage = error.message === 'No reply from OpenAI' 
+      ? responsePatterns.error 
+      : error.message || 'Internal server error';
+
     return NextResponse.json(
-      { error: error.message || 'Failed to process request' },
+      { error: errorMessage },
       { status: error.status || 500 }
     );
   }

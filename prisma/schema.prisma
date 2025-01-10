@@ -78,3 +78,15 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model AnonymousUsage {
+  id            String   @id @default(cuid())
+  identifier    String   @unique // IP address or other identifier
+  messageCount  Int      @default(0)
+  lastMessage   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([lastMessage])
+}

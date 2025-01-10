@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimit, checkAnonymousRateLimit, getAnonymousMessageCount } from '@/lib/rate-limit';
 import {
   assistantPersonality,
   personalityTraits,
@@ -48,22 +48,46 @@ function getRandomGreeting(): string {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
+    let shouldCheckRateLimit = true;
+    let anonymousId: string | undefined;
 
+    // Handle anonymous users
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // Use IP address or a session cookie as anonymous identifier
+      anonymousId = req.headers.get('x-forwarded-for') || 'anonymous';
+      
+      const isAllowed = await checkAnonymousRateLimit(anonymousId);
+      if (!isAllowed) {
+        const usage = await getAnonymousMessageCount(anonymousId);
+        const resetTime = new Date(Date.now() + usage.resetIn);
+        const resetTimeString = resetTime.toLocaleTimeString();
+        
+        return NextResponse.json(
+          { 
+            error: 'Message limit reached',
+            showAuth: true,
+            message: `You've reached the limit for anonymous messages. Sign up or sign in to continue chatting and get more messages per day! 🚀\n\nYour limit will reset at ${resetTimeString}.`
+          },
+          { status: 429 }
+        );
+      }
+      
+      shouldCheckRateLimit = false;
     }
 
-    // Check rate limit before processing the message
-    try {
-      await checkRateLimit(
-        session.user.id,
-        session.user.role === 'admin' ? req.headers.get('authorization')?.split(' ')[1] : undefined
-      );
-    } catch (error) {
-      if (error instanceof Error) {
-        return NextResponse.json({ error: error.message }, { status: 429 });
+    // Check rate limit for authenticated users
+    if (shouldCheckRateLimit && session?.user?.id) {
+      try {
+        await checkRateLimit(
+          session.user.id,
+          session.user.role === 'admin' ? req.headers.get('authorization')?.split(' ')[1] : undefined
+        );
+      } catch (error) {
+        if (error instanceof Error) {
+          return NextResponse.json({ error: error.message }, { status: 429 });
+        }
+        return NextResponse.json({ error: 'Rate limit error' }, { status: 429 });
       }
-      return NextResponse.json({ error: 'Rate limit error' }, { status: 429 });
     }
 
     const { message, context = [] } = (await req.json()) as ChatRequest;

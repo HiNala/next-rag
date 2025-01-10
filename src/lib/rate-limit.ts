@@ -132,3 +132,129 @@ export async function getUserMessageCount(userId: string) {
     remaining: limit === -1 ? -1 : limit - (messageUsage?.count || 0),
   };
 }
+
+const ANONYMOUS_LIMIT = 10;
+const ANONYMOUS_RESET_PERIOD = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+
+export async function checkAnonymousRateLimit(identifier: string): Promise<boolean> {
+  try {
+    const now = new Date();
+    const usage = await prisma.anonymousUsage.findUnique({
+      where: { identifier },
+    });
+
+    if (!usage) {
+      // First message from this anonymous user
+      await prisma.anonymousUsage.create({
+        data: {
+          identifier,
+          messageCount: 1,
+          lastMessage: now,
+        },
+      });
+      return true;
+    }
+
+    // Check if reset period has elapsed
+    const timeSinceLastMessage = now.getTime() - usage.lastMessage.getTime();
+    if (timeSinceLastMessage >= ANONYMOUS_RESET_PERIOD) {
+      // Reset count if time has elapsed
+      await prisma.anonymousUsage.update({
+        where: { identifier },
+        data: {
+          messageCount: 1,
+          lastMessage: now,
+        },
+      });
+      return true;
+    }
+
+    if (usage.messageCount >= ANONYMOUS_LIMIT) {
+      return false;
+    }
+
+    // Increment message count
+    await prisma.anonymousUsage.update({
+      where: { identifier },
+      data: {
+        messageCount: { increment: 1 },
+        lastMessage: now,
+      },
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error in checkAnonymousRateLimit:', error);
+    // If there's an error, allow the message through but log the error
+    return true;
+  }
+}
+
+export async function getAnonymousMessageCount(identifier: string) {
+  try {
+    const usage = await prisma.anonymousUsage.findUnique({
+      where: { identifier },
+    });
+
+    if (!usage) {
+      return {
+        current: 0,
+        limit: ANONYMOUS_LIMIT,
+        remaining: ANONYMOUS_LIMIT,
+        resetIn: 0,
+      };
+    }
+
+    const now = new Date();
+    const timeSinceLastMessage = now.getTime() - usage.lastMessage.getTime();
+    const resetIn = Math.max(0, ANONYMOUS_RESET_PERIOD - timeSinceLastMessage);
+
+    if (timeSinceLastMessage >= ANONYMOUS_RESET_PERIOD) {
+      return {
+        current: 0,
+        limit: ANONYMOUS_LIMIT,
+        remaining: ANONYMOUS_LIMIT,
+        resetIn: 0,
+      };
+    }
+
+    return {
+      current: usage.messageCount,
+      limit: ANONYMOUS_LIMIT,
+      remaining: Math.max(0, ANONYMOUS_LIMIT - usage.messageCount),
+      resetIn,
+    };
+  } catch (error) {
+    console.error('Error in getAnonymousMessageCount:', error);
+    // If there's an error, return default values
+    return {
+      current: 0,
+      limit: ANONYMOUS_LIMIT,
+      remaining: ANONYMOUS_LIMIT,
+      resetIn: 0,
+    };
+  }
+}
+
+export async function cleanupAnonymousUsage() {
+  try {
+    const cutoffDate = new Date(Date.now() - ANONYMOUS_RESET_PERIOD * 2); // Keep records for 24 hours
+    
+    await prisma.anonymousUsage.deleteMany({
+      where: {
+        lastMessage: {
+          lt: cutoffDate,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error in cleanupAnonymousUsage:', error);
+  }
+}
+
+// Run cleanup every 6 hours if this is a server environment
+if (typeof window === 'undefined') {
+  setInterval(cleanupAnonymousUsage, 6 * 60 * 60 * 1000);
+  // Run once at startup
+  cleanupAnonymousUsage().catch(console.error);
+}

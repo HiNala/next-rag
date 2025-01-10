@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { MarkdownMessage } from './MarkdownMessage';
+import AuthDialog from '@/components/auth/AuthDialog';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -15,6 +16,7 @@ export default function ChatBox() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isChatActive, setIsChatActive] = useState(false);
@@ -84,7 +86,12 @@ export default function ChatBox() {
         if (response.status === 401) {
           errorMessage = 'Chat is currently unavailable. Please try again later.';
         } else if (response.status === 429) {
-          errorMessage = 'Too many requests. Please wait a moment and try again.';
+          if (data.showAuth) {
+            setShowAuthDialog(true);
+            errorMessage = data.message || 'Message limit reached. Please sign in to continue.';
+          } else {
+            errorMessage = 'Too many requests. Please wait a moment and try again.';
+          }
         }
         throw new Error(errorMessage);
       }
@@ -130,86 +137,93 @@ export default function ChatBox() {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`chat-container ${isChatActive ? 'chat-active' : 'chat-initial'}`}
-    >
-      {!isChatActive ? (
-        <div className="flex flex-col space-y-6 max-w-xl w-full">
-          <h1 className="text-4xl font-medium text-foreground text-center">
-            What do you want to know?
-          </h1>
-          <form onSubmit={handleSubmit}>
-            <div className="chat-input-wrapper">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything..."
-                className="chat-input"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                disabled={isLoading}
-                size="lg"
-                className="transition-transform hover:scale-105 active:scale-95"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <ArrowRightIcon className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        <>
-          <div className="message-list message-list-active">
-            {messages.map((message, index) => (
-              <MarkdownMessage key={index} content={message.content} role={message.role} />
-            ))}
-            {isLoading && (
-              <div className="typing-indicator">
-                <div className="typing-dot" style={{ animationDelay: '0s' }} />
-                <div className="typing-dot" style={{ animationDelay: '0.2s' }} />
-                <div className="typing-dot" style={{ animationDelay: '0.4s' }} />
+    <>
+      <div
+        ref={containerRef}
+        className={`chat-container ${isChatActive ? 'chat-active' : 'chat-initial'}`}
+      >
+        {!isChatActive ? (
+          <div className="flex flex-col space-y-6 max-w-xl w-full">
+            <h1 className="text-4xl font-medium text-foreground text-center">
+              What do you want to know?
+            </h1>
+            <form onSubmit={handleSubmit}>
+              <div className="chat-input-wrapper">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything..."
+                  className="chat-input"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  size="lg"
+                  className="transition-transform hover:scale-105 active:scale-95"
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <ArrowRightIcon className="h-5 w-5" />
+                  )}
+                </Button>
               </div>
-            )}
-            {error && (
-              <div className="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-2 mt-2 animate-fade-in">
-                {error}
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+            </form>
           </div>
-
-          <form onSubmit={handleSubmit} className="input-container">
-            <div className="chat-input-wrapper">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything..."
-                className="chat-input"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="transition-transform hover:scale-105 active:scale-95"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <ArrowRightIcon className="h-4 w-4" />
-                )}
-              </Button>
+        ) : (
+          <>
+            <div className="message-list message-list-active">
+              {messages.map((message, index) => (
+                <MarkdownMessage key={index} content={message.content} role={message.role} />
+              ))}
+              {isLoading && (
+                <div className="typing-indicator">
+                  <div className="typing-dot" style={{ animationDelay: '0s' }} />
+                  <div className="typing-dot" style={{ animationDelay: '0.2s' }} />
+                  <div className="typing-dot" style={{ animationDelay: '0.4s' }} />
+                </div>
+              )}
+              {error && (
+                <div className="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-2 mt-2 animate-fade-in">
+                  {error}
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          </form>
-        </>
-      )}
-    </div>
+
+            <form onSubmit={handleSubmit} className="input-container">
+              <div className="chat-input-wrapper">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything..."
+                  className="chat-input"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="transition-transform hover:scale-105 active:scale-95"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <ArrowRightIcon className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
+      </div>
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        initialView="signup"
+      />
+    </>
   );
 }

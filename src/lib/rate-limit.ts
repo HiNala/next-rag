@@ -141,6 +141,10 @@ export async function checkAnonymousRateLimit(identifier: string): Promise<boole
     const now = new Date();
     const usage = await prisma.anonymousUsage.findUnique({
       where: { identifier },
+      select: {
+        messageCount: true,
+        lastMessage: true,
+      },
     });
 
     if (!usage) {
@@ -151,6 +155,7 @@ export async function checkAnonymousRateLimit(identifier: string): Promise<boole
           messageCount: 1,
           lastMessage: now,
         },
+        select: { id: true },
       });
       return true;
     }
@@ -165,6 +170,7 @@ export async function checkAnonymousRateLimit(identifier: string): Promise<boole
           messageCount: 1,
           lastMessage: now,
         },
+        select: { id: true },
       });
       return true;
     }
@@ -180,6 +186,7 @@ export async function checkAnonymousRateLimit(identifier: string): Promise<boole
         messageCount: { increment: 1 },
         lastMessage: now,
       },
+      select: { id: true },
     });
 
     return true;
@@ -194,6 +201,10 @@ export async function getAnonymousMessageCount(identifier: string) {
   try {
     const usage = await prisma.anonymousUsage.findUnique({
       where: { identifier },
+      select: {
+        messageCount: true,
+        lastMessage: true,
+      },
     });
 
     if (!usage) {

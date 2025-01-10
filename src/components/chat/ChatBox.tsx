@@ -79,9 +79,8 @@ export default function ChatBox() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         let errorMessage = data.error || 'Failed to get response';
         if (response.status === 401) {
           errorMessage = 'Chat is currently unavailable. Please try again later.';
@@ -95,6 +94,8 @@ export default function ChatBox() {
         }
         throw new Error(errorMessage);
       }
+
+      const data = await response.json();
 
       if (data.error) {
         throw new Error(data.error);

@@ -9,7 +9,6 @@ import { authOptions } from '@/lib/auth';
 import { checkRateLimit, checkAnonymousRateLimit, getAnonymousMessageCount } from '@/lib/rate-limit';
 import {
   assistantPersonality,
-  personalityTraits,
   responsePatterns,
 } from '@/config/assistant-personality';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
@@ -40,9 +39,11 @@ function getRandomGreeting(): string {
   const greetings = responsePatterns.greeting;
   if (Array.isArray(greetings)) {
     const randomIndex = Math.floor(Math.random() * greetings.length);
-    return greetings[randomIndex];
+    return greetings[randomIndex].replace(/^#+\s*/, '');
   }
-  return typeof greetings === 'string' ? greetings : 'Hi! How can I help you?';
+  return typeof greetings === 'string' 
+    ? greetings.replace(/^#+\s*/, '')
+    : 'Hi! How can I help you?';
 }
 
 export async function POST(req: Request) {
@@ -128,10 +129,10 @@ export async function POST(req: Request) {
     ];
 
     // Adjust API parameters based on personality traits
-    const temperature = 0.65 + personalityTraits.enthusiasm * 0.2;
-    const maxTokens = Math.floor(600 + personalityTraits.detail * 600);
-    const presencePenalty = personalityTraits.creativity * 0.35;
-    const frequencyPenalty = personalityTraits.formality * 0.35;
+    const temperature = 0.7;
+    const maxTokens = 500;
+    const presencePenalty = 0.1;
+    const frequencyPenalty = 0.1;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -141,9 +142,15 @@ export async function POST(req: Request) {
       presence_penalty: presencePenalty,
       frequency_penalty: frequencyPenalty,
       top_p: 0.9,
+      stream: true,
     });
 
-    const reply = completion.choices[0]?.message?.content;
+    let reply = '';
+    for await (const chunk of completion) {
+      if (chunk.choices[0]?.delta?.content) {
+        reply += chunk.choices[0].delta.content;
+      }
+    }
 
     if (!reply) {
       throw new Error('No reply from OpenAI');

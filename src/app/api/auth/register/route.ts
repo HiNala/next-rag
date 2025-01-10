@@ -7,10 +7,7 @@ export async function POST(req: Request) {
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Check if user already exists
@@ -19,10 +16,7 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
     // Hash password
@@ -48,9 +42,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
-} 
+}

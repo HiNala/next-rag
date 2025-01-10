@@ -211,7 +211,7 @@
     button {
       @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
     }
-    
+
     a {
       @apply min-h-[44px] flex items-center;
     }

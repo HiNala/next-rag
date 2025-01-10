@@ -46,9 +46,7 @@ export default function SignIn() {
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight">
-            Sign in to your account
-          </h2>
+          <h2 className="mt-6 text-3xl font-bold tracking-tight">Sign in to your account</h2>
         </div>
 
         <div className="mt-8 space-y-6">
@@ -85,9 +83,7 @@ export default function SignIn() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
@@ -106,9 +102,7 @@ export default function SignIn() {
                   className="chat-input"
                   placeholder="Email address"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={isLoading}
                 />
               </div>
@@ -125,23 +119,15 @@ export default function SignIn() {
                   className="chat-input"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   disabled={isLoading}
                 />
               </div>
             </div>
 
-            {error && (
-              <div className="text-sm text-red-500 text-center">{error}</div>
-            )}
+            {error && <div className="text-sm text-red-500 text-center">{error}</div>}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
@@ -153,4 +139,4 @@ export default function SignIn() {
       </div>
     </div>
   );
-} 
+}

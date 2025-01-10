@@ -55,9 +55,7 @@ export default function SignUp() {
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight">
-            Create your account
-          </h2>
+          <h2 className="mt-6 text-3xl font-bold tracking-tight">Create your account</h2>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -74,9 +72,7 @@ export default function SignUp() {
                 className="chat-input"
                 placeholder="Name"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 disabled={isLoading}
               />
             </div>
@@ -93,9 +89,7 @@ export default function SignUp() {
                 className="chat-input"
                 placeholder="Email address"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={isLoading}
               />
             </div>
@@ -112,9 +106,7 @@ export default function SignUp() {
                 className="chat-input"
                 placeholder="Password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 disabled={isLoading}
               />
             </div>
@@ -131,23 +123,15 @@ export default function SignUp() {
                 className="chat-input"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 disabled={isLoading}
               />
             </div>
           </div>
 
-          {error && (
-            <div className="text-sm text-red-500 text-center">{error}</div>
-          )}
+          {error && <div className="text-sm text-red-500 text-center">{error}</div>}
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
@@ -157,10 +141,7 @@ export default function SignUp() {
 
           <div className="text-sm text-center">
             Already have an account?{' '}
-            <Link
-              href="/auth/signin"
-              className="font-medium text-primary hover:text-primary/90"
-            >
+            <Link href="/auth/signin" className="font-medium text-primary hover:text-primary/90">
               Sign in
             </Link>
           </div>
@@ -168,4 +149,4 @@ export default function SignUp() {
       </div>
     </div>
   );
-} 
+}

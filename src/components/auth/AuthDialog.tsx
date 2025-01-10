@@ -3,12 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -140,9 +135,7 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
                 placeholder="Name"
                 className="chat-input"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 disabled={isLoading}
               />
@@ -152,9 +145,7 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
               placeholder="Email"
               className="chat-input"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               disabled={isLoading}
             />
@@ -163,9 +154,7 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
               placeholder="Password"
               className="chat-input"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
               disabled={isLoading}
             />
@@ -175,17 +164,13 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
                 placeholder="Confirm Password"
                 className="chat-input"
                 value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
                 disabled={isLoading}
               />
             )}
 
-            {error && (
-              <div className="text-sm text-red-500 text-center">{error}</div>
-            )}
+            {error && <div className="text-sm text-red-500 text-center">{error}</div>}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
@@ -201,21 +186,15 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
           <div className="mt-4 text-center text-sm">
             {view === 'signin' ? (
               <>
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setView('signup')}
-                  className="text-primary hover:underline"
-                >
+                Don&apos;t have an account?{' '}
+                <button onClick={() => setView('signup')} className="text-primary hover:underline">
                   Sign up
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{' '}
-                <button
-                  onClick={() => setView('signin')}
-                  className="text-primary hover:underline"
-                >
+                <button onClick={() => setView('signin')} className="text-primary hover:underline">
                   Sign in
                 </button>
               </>
@@ -225,4 +204,4 @@ export default function AuthDialog({ isOpen, onClose, initialView = 'signin' }: 
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -4,6 +4,9 @@
 
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 import {
   assistantPersonality,
   personalityTraits,
@@ -23,6 +26,10 @@ interface ChatRequest {
   context: ChatMessage[];
 }
 
+interface APIError extends Error {
+  status?: number;
+}
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -40,6 +47,25 @@ function getRandomGreeting(): string {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check rate limit before processing the message
+    try {
+      await checkRateLimit(
+        session.user.id,
+        session.user.role === 'admin' ? req.headers.get('authorization')?.split(' ')[1] : undefined
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 429 });
+      }
+      return NextResponse.json({ error: 'Rate limit error' }, { status: 429 });
+    }
+
     const { message, context = [] } = (await req.json()) as ChatRequest;
 
     if (!message) {
@@ -78,13 +104,13 @@ export async function POST(req: Request) {
     ];
 
     // Adjust API parameters based on personality traits
-    const temperature = 0.65 + personalityTraits.enthusiasm * 0.2; // Range: 0.65-0.85
-    const maxTokens = Math.floor(600 + personalityTraits.detail * 600); // Range: 600-1200, balanced for both concise and detailed responses
-    const presencePenalty = personalityTraits.creativity * 0.35; // Range: 0-0.35, balanced for variety
-    const frequencyPenalty = personalityTraits.formality * 0.35; // Range: 0-0.35, balanced for natural flow
+    const temperature = 0.65 + personalityTraits.enthusiasm * 0.2;
+    const maxTokens = Math.floor(600 + personalityTraits.detail * 600);
+    const presencePenalty = personalityTraits.creativity * 0.35;
+    const frequencyPenalty = personalityTraits.formality * 0.35;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Using GPT-4o Mini model
+      model: 'gpt-4o-mini',
       messages,
       temperature,
       max_tokens: maxTokens,
@@ -112,7 +138,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { error: errorMessage },
-      { status: (error instanceof Error && 'status' in error ? error.status : 500) as number }
+      {
+        status: (error instanceof Error && (error as APIError).status) || 500,
+      }
     );
   }
 }

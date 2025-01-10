@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,18 @@ export default function Sidebar() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [authView, setAuthView] = useState<'signin' | 'signup'>('signin');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Ensure hydration is complete before allowing menu interactions
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
+  const handleMenuToggle = () => {
+    if (isInitialized) {
+      setIsMobileMenuOpen((prev) => !prev);
+    }
+  };
 
   const handleAuthClick = (view: 'signin' | 'signup') => {
     setAuthView(view);
@@ -23,16 +35,13 @@ export default function Sidebar() {
     <>
       {/* Mobile Menu Button */}
       <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onClick={handleMenuToggle}
         className="fixed top-3 left-3 z-50 p-2 rounded-lg active:bg-accent/50 md:hidden touch-manipulation"
         aria-label="Toggle menu"
         type="button"
+        disabled={!isInitialized}
       >
-        {isMobileMenuOpen ? (
-          <X className="h-5 w-5" />
-        ) : (
-          <Menu className="h-5 w-5" />
-        )}
+        {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
       {/* Sidebar */}
@@ -44,8 +53,8 @@ export default function Sidebar() {
         <div className="flex flex-col h-full bg-background border-r md:rounded-none rounded-r-2xl overflow-hidden">
           <div className="flex-1 overflow-y-auto px-3 py-4">
             {/* Logo */}
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="flex items-center h-12 mb-6 pl-2.5 mt-4 md:mt-0"
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -95,11 +104,7 @@ export default function Sidebar() {
           {/* Auth Buttons */}
           <div className="p-3 border-t">
             {session ? (
-              <Button
-                onClick={() => signOut()}
-                className="w-full justify-center"
-                variant="outline"
-              >
+              <Button onClick={() => signOut()} className="w-full justify-center" variant="outline">
                 Sign Out
               </Button>
             ) : (
@@ -111,10 +116,7 @@ export default function Sidebar() {
                 >
                   Sign In
                 </Button>
-                <Button
-                  onClick={() => handleAuthClick('signup')}
-                  className="w-full justify-center"
-                >
+                <Button onClick={() => handleAuthClick('signup')} className="w-full justify-center">
                   Sign Up
                 </Button>
               </>

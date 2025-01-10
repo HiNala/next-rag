@@ -44,7 +44,7 @@ export default function ChatBox() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Trim input and check for empty state
     const trimmedInput = input.trim();
     if (!trimmedInput || isLoading) return;
@@ -59,7 +59,7 @@ export default function ChatBox() {
     try {
       // Set loading state before any state updates
       setIsLoading(true);
-      
+
       // Update messages with user input
       setMessages((prev) => [...prev, userMessage]);
       setInput('');
@@ -109,7 +109,7 @@ export default function ChatBox() {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       setError(errorMessage);
-      
+
       // Only add error message to chat if the user message was added
       setMessages((prev) => {
         // Check if the last message was the user's message

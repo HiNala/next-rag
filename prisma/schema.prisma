@@ -37,22 +37,38 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  messageCount Int      @default(0)  // Track messages per session for admin
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id                String    @id @default(cuid())
+  id                String         @id @default(cuid())
   name              String?
-  email             String?   @unique
+  email             String?        @unique
   emailVerified     DateTime?
   image             String?
   hashedPassword    String?
-  role              String    @default("user")
-  subscriptionLevel String    @default("free")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  role              String         @default("user")
+  subscriptionLevel String         @default("free")
+  lastLogin         DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   accounts          Account[]
   sessions          Session[]
+  messageUsage      MessageUsage[]
+}
+
+model MessageUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  count     Int      @default(0)
+  month     Int      // 1-12
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month, year])
 }
 
 model VerificationToken {
